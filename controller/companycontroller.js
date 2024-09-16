@@ -7,6 +7,13 @@ const CompanyModel = require("../models/Company")
 exports.addCompany = async (req, res) => {
     const { name, logo, description, industry, stage , fundingRounds} = req.body;
     try {
+
+       const ExistingCompany = await CompanyModel.findOne({name:name})
+       if(ExistingCompany){
+        res.status(400).json({
+          message:'Company is Already Exist....'
+        })
+       }
       const newCompany = new CompanyModel({ name, logo, description, industry, stage, fundingRounds });
       await newCompany.save();
       res.status(201).json(newCompany);
@@ -19,7 +26,7 @@ exports.addCompany = async (req, res) => {
   // Get all companies
 exports.getAllCompanies = async (req, res) => {
     try {
-      const companies = await Company.find();
+      const companies = await CompanyModel.find();
       res.status(200).json(companies);
     } catch (error) {
       res.status(500).json({ error: error.message });

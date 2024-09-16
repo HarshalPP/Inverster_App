@@ -168,7 +168,7 @@ exports.logout = async (req, res) => {
 
         const decodedData = jwt.verify(token, process.env.JWT_SECRET); // Verify token
         if (!decodedData) {
-            res.status(400).json({ message: 'Token is not verify' })
+            return res.status(400).json({ message: 'Token is not verify' })
         }
 
         const userData = await User.findOne({ _id: decodedData.id })
@@ -202,8 +202,35 @@ exports.logout = async (req, res) => {
 }
 
 
+// Verify token api
 
+exports.verifytoken = async(req,res)=>{
+    try{
+    const token = req.headers.authorization
 
+    if(!token){
+        res.status(400).json({message:'Please Login to Access this resources'})
+    }
+
+    const decodedData = jwt.verify(token, process.env.JWT_SECRET); // Verify token
+    const NewUser = await User.findOne({_id:decodedData.id}).select('-password -activeToken')
+    return res.status(200).json({
+        message:'success',
+        data:NewUser
+    })
+
+    }
+    catch (error) {
+        if (error.name === 'TokenExpiredError') {
+            return res.status(401).json({ message: 'Session expired, please login again' });
+        } else if (error.name === 'JsonWebTokenError') {
+            return res.status(401).json({ message: 'Invalid token, please login again' });
+        } else {
+            console.error('Server error:', error);
+            return res.status(500).json({ message: 'Internal server error' });
+        }
+    }
+}
 
 
 

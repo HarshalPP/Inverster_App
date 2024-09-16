@@ -6,6 +6,8 @@ const investmentSchema = new mongoose.Schema({
   amount: { type: Number, required: true },
   round: { type: String, required: true },
   date: { type: Date, default: Date.now() },
+},{
+  timestamps:true
 });
 
 module.exports = mongoose.model('Investment', investmentSchema);

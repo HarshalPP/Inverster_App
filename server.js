@@ -1,5 +1,6 @@
 const express = require('express')
 const dotenv = require("dotenv")
+const cors = require('cors')
 const {ConnectDb}=require("./config/dbconfig")
 const Router = require("./router")
 const app = express();
@@ -11,6 +12,8 @@ const PORT=process.env.PORT
 
 
 
+// To handle CORS //
+app.use(cors())
 
 // To have parse json data //
 app.use(express.json())
