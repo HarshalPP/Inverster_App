@@ -11,7 +11,13 @@ const UserSchema = new mongoose.Schema({
     investments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Investment' }],
     notifications: [{ type: mongoose.Schema.Types.ObjectId, ref: 'News' }],
     role: { type: String, enum: ['Investor', 'Admin'], default: 'Investor' },
+    isPasswordSet:{
+     type:String,
+     enum:['false' , 'true'],
+     default:false
+    },
     activeToken:{type:String},
+    tokenExpiry: { type: Date }, // Add expiry date for the token
     passwordChangedAt: Date,
     passwordResetToken: String,
     passwordResetExpires: Date,
@@ -44,16 +50,23 @@ UserSchema.methods.verifytoken = async function (token){
     return await jwt.verify(token, process.env.JWT_SECRET); // Verify token
 }
 
+UserSchema.methods.isTokenExpired = function() {
+    if (!this.tokenExpiry) return true;
+    return new Date() > this.tokenExpiry;
+};
 
 
 // Sign and return a JWT token
-UserSchema.methods.getSignedToken = function () {
-    return jwt.sign(
-        { id: this._id, role: this.role },
-        process.env.JWT_SECRET,
-        { expiresIn: process.env.JWT_EXPIRE }
-    );
+
+
+// Method to generate a new signed token
+UserSchema.methods.getSignedToken = function() {
+    const payload = { id: this._id , role:this.role};
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' }); // Set expiry for the token
+    this.tokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days in milliseconds
+    return token;
 };
+
 
 // Generate and hash a password reset token
 UserSchema.methods.getResetPasswordToken = function () {

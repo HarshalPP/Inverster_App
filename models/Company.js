@@ -7,8 +7,9 @@ const companySchema = new mongoose.Schema({
   description: { type: String },
   industry: { type: String },
   stage: { type: String }, // e.g., Seed, Series A, etc.
-  investments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Investment' }],
-  fundingRounds: [{ type: String }], // E.g., Seed, Series A, Series B
+  // investments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Investment' }],
+  // fundingRounds: [{ type: String }], // E.g., Seed, Series A, Series B
+  fundingRounds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'FundingRound' }],
   updates: [{ type: mongoose.Schema.Types.ObjectId, ref: 'News' }],
   createdAt: { type: Date, default: Date.now },
 },{

@@ -26,7 +26,7 @@ exports.addCompany = async (req, res) => {
   // Get all companies
 exports.getAllCompanies = async (req, res) => {
     try {
-      const companies = await CompanyModel.find();
+      const companies = await CompanyModel.find({}).populate('fundingRounds')
       res.status(200).json(companies);
     } catch (error) {
       res.status(500).json({ error: error.message });

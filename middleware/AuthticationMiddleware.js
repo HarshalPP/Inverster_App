@@ -15,7 +15,7 @@ exports.isAuthenticated = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // Check if the user role is 'Investor'
-    if (decoded.role === 'Investor') {
+    if (decoded.role === 'Investor' || decoded.role === 'Admin') {
       const user = await User.findById(decoded.id);
 
       if (!user) {
@@ -44,15 +44,10 @@ exports.isAuthenticated = async (req, res, next) => {
 
 // Check the Role of the Users //
 
-exports.isAuthorized = async(requiredRoles)=>{
+exports.isAuthorized = (...requiredRoles)=>{
     return (req,res,next)=>{
       // check if User is Authicated
 
-      if(!req.user){
-        return res.status(401).json({
-            message:'User is not Authenticated'
-        })
-      }
     
       if(!requiredRoles.includes(req.user.role)){
         return res.status(403).json({ message: 'Access denied, insufficient permissions.' });
