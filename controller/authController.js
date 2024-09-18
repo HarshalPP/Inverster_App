@@ -318,8 +318,7 @@ exports.logout = async (req, res) => {
     }
 }
 
-// Verify token api
-
+// Verify token api//
 exports.verifytoken = async(req,res)=>{
     try{
     const token = req.headers.authorization
@@ -422,6 +421,9 @@ exports.passwordSetup = async (req, res) => {
       });
     }
   };
+
+
+
 
 
 
