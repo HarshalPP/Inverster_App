@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 
 const companySchema = new mongoose.Schema({
   name: { type: String, required: true },
-  logo: { type: String }, // URL of the company's logo
+  company_url: { type: String }, // URL of the company's logo
   description: { type: String },
   industry: { type: String },
   stage: { type: String }, // e.g., Seed, Series A, etc.

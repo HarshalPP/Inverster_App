@@ -5,13 +5,15 @@ const User = require('../models/User');
 exports.isAuthenticated = async (req, res, next) => {
   const token = req.headers.authorization;
 
-  // Check if token is provided
+  // Check if token is provided//
+
   if (!token) {
     return res.status(400).json({ message: 'Access denied, token missing.' });
   }
 
   try {
-    // Verify the token using JWT
+    // Verify the token using JWT //
+    
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // Check if the user role is 'Investor'
@@ -47,8 +49,6 @@ exports.isAuthenticated = async (req, res, next) => {
 exports.isAuthorized = (...requiredRoles)=>{
     return (req,res,next)=>{
       // check if User is Authicated
-
-    
       if(!requiredRoles.includes(req.user.role)){
         return res.status(403).json({ message: 'Access denied, insufficient permissions.' });
       }

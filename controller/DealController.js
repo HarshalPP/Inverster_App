@@ -70,6 +70,7 @@ exports.getActiveDeals = async (req, res) => {
 
 
         })
+        
         res.status(200).json({
             message: 'Active deals retrieved successfully',
             activeDeals: activeDealsWithProgress
