@@ -15,7 +15,7 @@ exports.addCompany = async (req, res) => {
           message:'Company is Already Exist....'
         })
        }
-      const newCompany = new CompanyModel({ name, logo, description, industry, stage, fundingRounds });
+      const newCompany = new CompanyModel({ name, company_url, description, industry, stage, fundingRounds });
       await newCompany.save();
       res.status(201).json(newCompany);
     } catch (error) {
@@ -65,3 +65,57 @@ exports.addCompany = async (req, res) => {
     }
   };
   
+
+// SORTED DATA TO Find //
+  exports.GetSorted = async(req,res)=>{
+    try{
+      const {name,industry,stage}=req.query
+      const matchcriticria = {}
+      if(name){
+        matchcriticria.name = name
+      }
+      if(industry){
+        matchcriticria.industry = industry
+      }
+      if(stage){
+        matchcriticria.stage = stage
+      }
+      const finddata =  await CompanyModel.aggregate([
+        {
+          // stage 1st
+          $match:matchcriticria
+        }
+      ])
+
+      const response = finddata
+      res.status(200).json({
+        msg:'Find data Reterive data',
+        data:response
+      })
+
+    }catch(error){
+    res.status(500).json('Internal server error')
+    }
+  }
+  //Problem 1: Group Companies by Industry and Count Them
+// Question: Group companies by their industry and get the count of companies in each industry.
+exports.GroupCompanies = async(req,res)=>{
+  try{
+   
+    // I have to use a outoor Left Join //
+    const FindComapny  = await CompanyModel.aggregate([
+      {
+        $lookup:{
+          from:'FundingRound',
+          localField:'fundingRounds',
+          foreignField:'_id',
+          as:"Funding_Details"
+        }
+      }
+    ])
+    return res.status(200).json({FindComapny})
+  }
+  catch(error){
+    return res.status(500).json('Internal Server Error')
+  }
+}

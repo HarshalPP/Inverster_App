@@ -1,6 +1,7 @@
 // models/Company.js
 const mongoose = require('mongoose');
 
+
 const companySchema = new mongoose.Schema({
   name: { type: String, required: true },
   company_url: { type: String }, // URL of the company's logo

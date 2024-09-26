@@ -165,105 +165,196 @@ exports.bulkCreateUsers = async (req, res) => {
 
 // Login Controller //
 
+// exports.Login = async (req, res) => {
+//     const { email, password } = req.body;
+
+//     // Check if both email and password are provided
+//     if (!email || !password) {
+//         return res.status(400).json({ message: 'Please provide both email and password.' });
+//     }
+
+//     try {
+//         // Find the user by email
+//         const user = await User.findOne({ email: email });
+
+//         if (!user) {
+//             return res.status(400).json({ message: 'Email not found.' });
+//         }
+
+//         // If the user has no password set (e.g., OAuth login)
+//         if (!user.password) {
+//             // Check if the active token exists and is valid
+//             if (user.activeToken && user.isTokenExpired()) {
+//                 return res.status(200).json({
+//                     success: true,
+//                     user: {
+//                         _id: user._id,
+//                         firstname: user.firstName,
+//                         lastname: user.lastName,
+//                         email: user.email,
+//                     },
+//                     token: user.activeToken,
+//                 });
+//             } else {
+//                 // If no valid token exists, generate a new one
+//                 const token = user.getSignedToken();  // Use getSignedToken to generate token
+
+//                 // Update user with the new active token
+//                 await User.findByIdAndUpdate(
+//                     user._id.toString(),
+//                     { activeToken: token },
+//                     { new: true }
+//                 );
+
+//                 return res.status(200).json({
+//                     success: true,
+//                     user: {
+//                         _id: user._id,
+//                         firstname: user.firstName,
+//                         lastname: user.lastName,
+//                         email: user.email,
+//                     },
+//                     token: token,
+//                 });
+//             }
+//         }
+
+//         // Check if the password matches
+//         const isMatch = await user.matchPasswords(password);
+//         if (isMatch) {
+//             // Check if the active token exists and is valid
+//             if (user.activeToken && user.isTokenExpired()) {
+//                 return res.status(200).json({
+//                     success: true,
+//                     user: {
+//                         _id: user._id,
+//                         firstname: user.firstName,
+//                         lastname: user.lastName,
+//                         email: user.email,
+//                     },
+//                     token: user.activeToken,
+//                 });
+//             } else {
+//                 // Generate a new token if no valid active token exists
+//                 const token = user.getSignedToken();
+
+//                 // Update user with the new active token
+//                 await User.findByIdAndUpdate(
+//                     user._id.toString(),
+//                     { activeToken: token },
+//                     { new: true }
+//                 );
+
+//                 return res.status(200).json({
+//                     success: true,
+//                     user: {
+//                         _id: user._id,
+//                         firstname: user.firstName,
+//                         lastname: user.lastName,
+//                         email: user.email,
+//                     },
+//                     token: token,
+//                 });
+//             }
+//         } else {
+//             // If password is incorrect
+//             return res.status(401).json({ message: 'Invalid credentials.' });
+//         }
+//     } catch (error) {
+//         console.error('Error during login:', error);
+//         return res.status(500).json({ message: 'An internal server error occurred.', error: error.message });
+//     }
+// };
+
 exports.Login = async (req, res) => {
-    const { email, password } = req.body;
+  const { email, password } = req.body;
 
-    // Check if both email and password are provided
-    if (!email || !password) {
-        return res.status(400).json({ message: 'Please provide both email and password.' });
-    }
+  // Check if both email and password are provided
+  if (!email || !password) {
+      return res.status(400).json({ message: 'Please provide both email and password.' });
+  }
 
-    try {
-        // Find the user by email
-        const user = await User.findOne({ email: email });
+  try {
+      // Find the user by email
+      const user = await User.findOne({ email: email });
 
-        if (!user) {
-            return res.status(400).json({ message: 'Email not found.' });
-        }
+      if (!user) {
+          return res.status(404).json({ message: 'Email not found.' });
+      }
 
-        // If the user has no password set (e.g., OAuth login)
-        if (!user.password) {
-            // Check if the active token exists and is valid
-            if (user.activeToken && user.isTokenExpired()) {
-                return res.status(200).json({
-                    success: true,
-                    user: {
-                        _id: user._id,
-                        firstname: user.firstName,
-                        lastname: user.lastName,
-                        email: user.email,
-                    },
-                    token: user.activeToken,
-                });
-            } else {
-                // If no valid token exists, generate a new one
-                const token = user.getSignedToken();  // Use getSignedToken to generate token
+      // Function to generate and update active token
+      const generateAndUpdateToken = async () => {
+          const token = user.getSignedToken(); // Generate new token
+          await User.findByIdAndUpdate(user._id.toString(), { activeToken: token }, { new: true });
+          return token;
+      };
 
-                // Update user with the new active token
-                await User.findByIdAndUpdate(
-                    user._id.toString(),
-                    { activeToken: token },
-                    { new: true }
-                );
+      // If the user has no password set (e.g., OAuth login)
+      if (!user.password) {
+          if (user.activeToken && !user.isTokenExpired()) {
+              // If token exists and is valid, return it
+              return res.status(200).json({
+                  success: true,
+                  user: {
+                      _id: user._id,
+                      firstname: user.firstName,
+                      lastname: user.lastName,
+                      email: user.email,
+                  },
+                  token: user.activeToken,
+              });
+          } else {
+              // Generate a new token if no valid token exists
+              const token = await generateAndUpdateToken();
+              return res.status(200).json({
+                  success: true,
+                  user: {
+                      _id: user._id,
+                      firstname: user.firstName,
+                      lastname: user.lastName,
+                      email: user.email,
+                  },
+                  token: token,
+              });
+          }
+      }
 
-                return res.status(200).json({
-                    success: true,
-                    user: {
-                        _id: user._id,
-                        firstname: user.firstName,
-                        lastname: user.lastName,
-                        email: user.email,
-                    },
-                    token: token,
-                });
-            }
-        }
+      // Check if the password matches
+      const isMatch = await user.matchPasswords(password);
+      if (!isMatch) {
+          return res.status(401).json({ message: 'Invalid credentials.' });
+      }
 
-        // Check if the password matches
-        const isMatch = await user.matchPasswords(password);
-        if (isMatch) {
-            // Check if the active token exists and is valid
-            if (user.activeToken && user.isTokenExpired()) {
-                return res.status(200).json({
-                    success: true,
-                    user: {
-                        _id: user._id,
-                        firstname: user.firstName,
-                        lastname: user.lastName,
-                        email: user.email,
-                    },
-                    token: user.activeToken,
-                });
-            } else {
-                // Generate a new token if no valid active token exists
-                const token = user.getSignedToken();
-
-                // Update user with the new active token
-                await User.findByIdAndUpdate(
-                    user._id.toString(),
-                    { activeToken: token },
-                    { new: true }
-                );
-
-                return res.status(200).json({
-                    success: true,
-                    user: {
-                        _id: user._id,
-                        firstname: user.firstName,
-                        lastname: user.lastName,
-                        email: user.email,
-                    },
-                    token: token,
-                });
-            }
-        } else {
-            // If password is incorrect
-            return res.status(401).json({ message: 'Invalid credentials.' });
-        }
-    } catch (error) {
-        console.error('Error during login:', error);
-        return res.status(500).json({ message: 'An internal server error occurred.', error: error.message });
-    }
+      // Handle token for users with passwords
+      if (user.activeToken && !user.isTokenExpired()) {
+          return res.status(200).json({
+              success: true,
+              user: {
+                  _id: user._id,
+                  firstname: user.firstName,
+                  lastname: user.lastName,
+                  email: user.email,
+              },
+              token: user.activeToken,
+          });
+      } else {
+          // Generate a new token if no valid active token exists
+          const token = await generateAndUpdateToken();
+          return res.status(200).json({
+              success: true,
+              user: {
+                  _id: user._id,
+                  firstname: user.firstName,
+                  lastname: user.lastName,
+                  email: user.email,
+              },
+              token: token,
+          });
+      }
+  } catch (error) {
+      console.error('Error during login:', error);
+      return res.status(500).json({ message: 'An internal server error occurred.' });
+  }
 };
 
 
