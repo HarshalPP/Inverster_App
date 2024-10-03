@@ -285,31 +285,43 @@ exports.getConsignorName = async (req, res) => {
 
 //Update API //
 
-exports.updateConsignorNames = async(req,res)=>{
-  try{
-   const FindProducts = await ProductCollection.find({})
-   if(!FindProducts){
-    return res.status(200).json('Product is not found')
-   }
-    for(let Products of  FindProducts){
+exports.updateConsignorNames = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1; 
+    const limit = parseInt(req.query.limit) || 10; 
+    const skip = (page - 1) * limit;
 
-      const FindConsignerId = await Consignor.findOne({id:Products.consignorId})
-      if(FindConsignerId){
-        Products.consignorName =  FindConsignerId.consignorName
-        await Products.save();
-      }
-  
+
+    const products = await ProductCollection.find().skip(skip).limit(limit);
+
+    if (!products || products.length === 0) {
+      return res.status(200).json('No products found');
     }
 
-   return res.status(200).json({
-    mesg:true,
-    data:FindProducts
-   })
+
+    for (let product of products) {
+      const consignor = await Consignor.findOne({ id: product.consignorId });
+      if (consignor) {
+        product.consignorName = consignor.consignorName;
+        await product.save();
+      }
+    }
+
+    const totalProducts = await ProductCollection.countDocuments();
+    const totalPages = Math.ceil(totalProducts / limit);
+
+    return res.status(200).json({
+      success: true,
+      data: products,
+      currentPage: page,
+      totalPages: totalPages,
+      totalProducts: totalProducts,
+    });
+  } catch (error) {
+    return res.status(500).json({ msg: 'Internal Server Error', error: error.message });
   }
-  catch(error){
-    return res.status(500).json({msg:'Internal Server Error' , error:error.message})
-  }
-}
+};
+
 
 
 
