@@ -7,6 +7,7 @@ const InvestorRouter = require("./routes/InvestorRouter")
 const NewsRouter = require("./routes/NewsRouter")
 const DealRouter = require("./routes/DealRouter")
 const FundingRouter =require("./routes/fundingRouter")
+const ProductRouter = require("./routes/product")
 
 
  //  Define the Middleware //
@@ -16,6 +17,7 @@ const FundingRouter =require("./routes/fundingRouter")
  app.use("/NewsRouter" , NewsRouter)
  app.use("/Deal" , DealRouter)
  app.use("/funding",FundingRouter)
+ app.use("/Prodcuts" , ProductRouter)
 
 
 module.exports=app;
