@@ -20,6 +20,12 @@ app.use(cookieParser());
 app.use(express.json())
 app.use(express.urlencoded({extended:true}));
 
+// To check api is Running or Nor
+
+app.get('/',()=>{
+  console.log("API IS RUNNING")
+})
+
 // Set Middleware //
 
 app.use("/api/v1" , Router)
