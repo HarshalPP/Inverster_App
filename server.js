@@ -22,9 +22,11 @@ app.use(express.urlencoded({extended:true}));
 
 // To check api is Running or Nor
 
-app.get('/',()=>{
-  console.log("API IS RUNNING")
-})
+// To check if API is running
+app.get('/', (req, res) => {
+    res.send("API IS RUNNING");
+    console.log("API IS RUNNING");
+  });
 
 // Set Middleware //
 
